@@ -18,7 +18,7 @@ https://www.kaggle.com/c/mercari-price-suggestion-challenge
 
 ## Update Logs
 
-* ** Version 1.0 - 30th Dec 2017:**
+* **Version 1.0 - 30th Dec 2017:**
 
   + Base script
 

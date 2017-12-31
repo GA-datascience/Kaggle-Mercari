@@ -22,13 +22,38 @@ https://www.kaggle.com/c/mercari-price-suggestion-challenge
 
   + Base script
 
+## Structure and Features of Script
+
+* Pre-processing
+  + Item 1
+  + Item 2
+
+* Features Engineering
+  + Item 1
+  + Item 2
+
+* Modelling
+  + Item 1
+  + Item 2
+
+* Hyperparameters Tuning
+  + Item 1
+  + Item 2
+
+* Ensembling
+  + Item 1
+  + Item 2
+
+* Cross Validation
+  + Item 1
+  + Item 2
+
 ## References
 
-* Title 
-  + <Link>
-
-* Title 1
-  + <Link 1>
+* Useful public EDAs for starting out
+  + Mercari EDA - More Info Than You Can Imagine
+  + https://www.kaggle.com/vrtjso/mercari-eda-more-info-than-you-can-imagine/notebook
+  + https://www.kaggle.com/thykhuely/mercari-interactive-eda-topic-modelling/notebook
 
 * Title 2
   + <Link 2>

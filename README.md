@@ -51,7 +51,6 @@ https://www.kaggle.com/c/mercari-price-suggestion-challenge
 ## References
 
 * Useful public EDAs for starting out
-  + Mercari EDA - More Info Than You Can Imagine
   + https://www.kaggle.com/vrtjso/mercari-eda-more-info-than-you-can-imagine/notebook
   + https://www.kaggle.com/thykhuely/mercari-interactive-eda-topic-modelling/notebook
 

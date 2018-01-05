@@ -8,6 +8,8 @@ from sklearn.pipeline import FeatureUnion
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 import lightgbm as lgb
 from sklearn.model_selection import train_test_split
+from sklearn.linear_model import Ridge
+import gc
 
 # Any results you write to the current directory are saved as output.
 
@@ -35,7 +37,7 @@ def split_Cat(text):
     try: return text.split("/")
     except: return ("No Label", "No Label", "No Label")
 
-def tokenise(train, test):
+def tokenise(train):
     default_preprocessor = CountVectorizer().build_preprocessor()
     
     def build_preprocessor(field):
@@ -66,40 +68,52 @@ def tokenise(train, test):
         token_pattern='\d+',
         preprocessor=build_preprocessor('item_condition_id'))),
     ('item_description', TfidfVectorizer(
-        ngram_range=(1, 3),
-        max_features=50000,
+        ngram_range=(2, 3),
+        max_features=100000,
         stop_words='english',
         preprocessor=build_preprocessor('item_description'))),
     ])
     
     print('features creation completed')
     
-    X_train = vectorizer.fit_transform(train.values)
-    X_test = vectorizer.fit_transform(test.values)
+    data = vectorizer.fit_transform(train.values)
 
-    return X_train, X_test
+    return data
 
 def main():
     train, test = getdata()
     print('loaded data')
     
-    train['general_cat'], train['subcat_1'], train['subcat_2'] = \
-        zip(*train['category_name'].apply(lambda x: split_Cat(x)))
+    nrow_train = train.shape[0]
+    y = np.log1p(train["price"])
+    merge =  pd.concat([train, test])
     
-    test['general_cat'], test['subcat_1'], test['subcat_2'] = \
-        zip(*test['category_name'].apply(lambda x: split_Cat(x)))
+    submission= pd.DataFrame(test[['test_id']])
     
-    train.drop('category_name', axis=1, inplace=True)
-    test.drop('category_name', axis=1, inplace=True)
+    del train
+    del test
+    gc.collect()
     
-    train = clean(train)
-    train = train.drop(train[train.price == 0].index)
-    y = np.log1p(train['price'])
-    train.drop(['price'], axis=1,inplace=True)
-    test = clean(test)
+    merge['general_cat'], merge['subcat_1'], merge['subcat_2'] = \
+        zip(*merge['category_name'].apply(lambda x: split_Cat(x)))
+    
+    merge.drop('category_name', axis=1, inplace=True)
+    
+    merge = clean(merge)
+    
+    #train = train.drop(train[train.price == 0].index)
+    #y = np.log1p(train['price'])
+    #train.drop(['price'], axis=1,inplace=True)
+    #test = clean(test)
     print('Cleaned data')
     
-    X, X_test = tokenise(train, test)
+    merge = tokenise(merge)
+    
+    X = merge[:nrow_train]
+    X_test = merge[nrow_train:]
+    
+    print(X.shape)
+    print(X_test.shape)
     
     print('Tokenised Completed')
     
@@ -113,7 +127,7 @@ def main():
     params = {
         'learning_rate': 0.65,
         'application': 'regression',
-        'max_depth': 3,
+        'max_depth': 5,
         'num_leaves': 60,
         'verbosity': -1,
         'metric': 'RMSE',
@@ -123,12 +137,17 @@ def main():
     }
     
     model = lgb.train(params, train_set=d_train, num_boost_round=8000, valid_sets=watchlist, \
-    early_stopping_rounds=1000, verbose_eval=1000) 
+    early_stopping_rounds=1000, verbose_eval=1000)
+    
+    '''
+    model = Ridge(solver="sag", fit_intercept=True, random_state=205)
+    model.fit(X, y)
+    '''
     print('Modelling training complete')
     
-    predicted_price = model.predict(X_test)
-
-    submission= pd.DataFrame(test[['test_id']])
+    predicted_log_price = model.predict(X_test)
+    predicted_price = np.expm1(predicted_log_price).tolist()
+    
     submission['price'] = predicted_price
     submission.to_csv("submission.csv", index=False)
     print('Completed')

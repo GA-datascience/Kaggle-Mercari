@@ -45,16 +45,16 @@ def tokenise(train):
         return lambda x: default_preprocessor(x[field_idx])
     
     vectorizer = FeatureUnion([
-    ('name', CountVectorizer(
-        ngram_range=(1, 2),
-        max_features=50000,
+    ('name', TfidfVectorizer(
+        ngram_range=(1, 4),
+        max_features=100000,
         preprocessor=build_preprocessor('name'))),
     ('general_cat', CountVectorizer(
-        token_pattern='.+',
-        preprocessor=build_preprocessor('general_cat'))),
+       token_pattern='.+',
+       preprocessor=build_preprocessor('general_cat'))),
     ('subcat_1', CountVectorizer(
-        token_pattern='.+',
-        preprocessor=build_preprocessor('subcat_1'))),            
+       token_pattern='.+',
+       preprocessor=build_preprocessor('subcat_1'))),           
     ('subcat_2', CountVectorizer(
         token_pattern='.+',
         preprocessor=build_preprocessor('subcat_2'))),            
@@ -67,9 +67,9 @@ def tokenise(train):
     ('item_condition_id', CountVectorizer(
         token_pattern='\d+',
         preprocessor=build_preprocessor('item_condition_id'))),
-    ('item_description', TfidfVectorizer(
-        ngram_range=(2, 3),
-        max_features=100000,
+    ('item_description', CountVectorizer(
+        ngram_range=(1, 3),
+        max_features=10000,
         stop_words='english',
         preprocessor=build_preprocessor('item_description'))),
     ])
@@ -125,9 +125,9 @@ def main():
     watchlist = [d_train, d_valid]
     
     params = {
-        'learning_rate': 0.65,
+        'learning_rate': 0.5,
         'application': 'regression',
-        'max_depth': 5,
+        'max_depth': 3,
         'num_leaves': 60,
         'verbosity': -1,
         'metric': 'RMSE',
@@ -139,17 +139,24 @@ def main():
     model = lgb.train(params, train_set=d_train, num_boost_round=8000, valid_sets=watchlist, \
     early_stopping_rounds=1000, verbose_eval=1000)
     
-    '''
+    print('LightGBM training complete')
+    
+    predicted_log_price_lgb = model.predict(X_test)
+    predicted_price_lgb = np.expm1(predicted_log_price_lgb)
+    
     model = Ridge(solver="sag", fit_intercept=True, random_state=205)
     model.fit(X, y)
-    '''
-    print('Modelling training complete')
     
-    predicted_log_price = model.predict(X_test)
-    predicted_price = np.expm1(predicted_log_price).tolist()
-    
-    submission['price'] = predicted_price
+    predicted_log_price_Ridge = model.predict(X_test)
+    predicted_price_Ridge = np.expm1(predicted_log_price_Ridge)
+
+    print('Ridge training complete')
+
+    predicted_price = 0.7*predicted_price_lgb + 0.3*predicted_price_Ridge
+
+    submission['price'] = predicted_price.tolist()
     submission.to_csv("submission.csv", index=False)
+    
     print('Completed')
 
 if __name__ == '__main__':

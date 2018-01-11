@@ -4,7 +4,7 @@
 
 ## Updates
 
-Current Method: Ridge Regression + LightGBM => Score: 0.44481
+Current Method: Ridge Regression + LightGBM => Score: 0.44073
 
 Possible Improvements: Use NLTK on the Item Descriptions to identify words that describe the conditions of the items such as “Brand New” etc.
 

@@ -125,9 +125,9 @@ def main():
     watchlist = [d_train, d_valid]
     
     params = {
-        'learning_rate': 0.5,
+        'learning_rate': 0.2,
         'application': 'regression',
-        'max_depth': 3,
+        'max_depth': 5,
         'num_leaves': 60,
         'verbosity': -1,
         'metric': 'RMSE',
@@ -152,7 +152,7 @@ def main():
 
     print('Ridge training complete')
 
-    predicted_price = 0.7*predicted_price_lgb + 0.3*predicted_price_Ridge
+    predicted_price = 0.8*predicted_price_lgb + 0.2*predicted_price_Ridge
 
     submission['price'] = predicted_price.tolist()
     submission.to_csv("submission.csv", index=False)

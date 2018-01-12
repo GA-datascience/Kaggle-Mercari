@@ -6,7 +6,7 @@
 
 Current Method: Ridge Regression + LightGBM => Score: 0.44073
 
-Possible Improvements: Use NLTK on the Item Descriptions to identify words that describe the conditions of the items such as “Brand New” etc.
+Tired but fail: Use NLTK remove all nouns from item description before feeding it to the LightGBM & Ridge Regression
 
 ## Introduction
 
